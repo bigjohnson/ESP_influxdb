@@ -29,7 +29,6 @@ DB_RESPONSE Influxdb::opendb(String db, String user, String password) {
                 if (payload.indexOf("[[\"" + db + "\"]]" ) > 0) {
                         //_db = db;
                         _db = db + "&u=" + user + "&p=" + password;
-                        Serial.println(payload);
                         return _response;
                 }
         }
@@ -50,7 +49,6 @@ DB_RESPONSE Influxdb::opendb(String db) {
                 http.end();
                 if (payload.indexOf("[[\"" + db + "\"]]" ) > 0) {
                         _db = db;
-                        Serial.println(payload);
                         return _response;
                 }
         }
