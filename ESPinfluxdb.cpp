@@ -17,7 +17,25 @@ Influxdb::Influxdb(const char *host, uint16_t port) {
 }
 
 DB_RESPONSE Influxdb::opendb(String db, String user, String password) {
-        _db = db + "&u=" + user + "&p=" + password;
+        //_db = db + "&u=" + user + "&p=" + password;
+        HTTPClient http;
+        http.begin("http://" + _host + ":" + _port + "/query?q=show%20databases" + "&u=" + user + "&p=" + password); //HTTP
+
+        int httpCode = http.GET();
+        if (httpCode == 200) {
+                _response = DB_SUCCESS;
+                String payload = http.getString();
+                http.end();
+                if (payload.indexOf("[[\"" + db + "\"]]" ) > 0) {
+                        //_db = db;
+                        _db = db + "&u=" + user + "&p=" + password;
+                        Serial.println(payload);
+                        return _response;
+                }
+        }
+        _response = DB_ERROR;
+        DEBUG_PRINT("Database open failed");
+        return _response;
 }
 
 DB_RESPONSE Influxdb::opendb(String db) {
@@ -26,14 +44,12 @@ DB_RESPONSE Influxdb::opendb(String db) {
         http.begin("http://" + _host + ":" + _port + "/query?q=show%20databases"); //HTTP
 
         int httpCode = http.GET();
-
         if (httpCode == 200) {
                 _response = DB_SUCCESS;
                 String payload = http.getString();
                 http.end();
-
-                if (payload.indexOf("db") > 0) {
-                        _db =  db;
+                if (payload.indexOf("[[\"" + db + "\"]]" ) > 0) {
+                        _db = db;
                         Serial.println(payload);
                         return _response;
                 }
